@@ -1,0 +1,24 @@
+{
+  "name": "borgblog",
+  "version": "0.1.0",
+  "description": "AI agent failure retrospective blog generator — Jekyll + GitHub Pages",
+  "type": "module",
+  "bin": {
+    "borgblog": "./cli.js"
+  },
+  "files": [
+    "cli.js",
+    "src/",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=18.3"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.js",
+    "test:watch": "node --test --watch test/*.test.js"
+  },
+  "keywords": ["jekyll", "blog", "ai", "retrospective", "cli"],
+  "license": "MIT",
+  "author": ""
+}
