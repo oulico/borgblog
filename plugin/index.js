@@ -1,6 +1,7 @@
 import { writeFileSync, mkdirSync, existsSync } from "node:fs";
 import { join } from "node:path";
 import { execSync } from "node:child_process";
+import { tool } from "@opencode-ai/plugin";
 
 const PROCESSED = new Set();
 const BLOG_DIR = join(process.env.HOME, "my-retro-blog");
@@ -80,6 +81,45 @@ export default async function BorgblogPlugin(ctx) {
   }
 
   return {
+    tool: {
+      borgblog: tool({
+        description: "Generate a retrospective blog post from this session. Uses Claude to write the narrative and publishes to GitHub Pages.",
+        args: {
+          force: tool.schema.boolean().optional().describe("Skip significance check — generate even if no errors were found"),
+          sessionId: tool.schema.string().optional().describe("Session ID (defaults to current session)"),
+        },
+        async execute(args, context) {
+          const sessionID = args.sessionId || context.sessionID;
+          if (!sessionID) return "No session ID available. Wait for the session to be created first.";
+
+          try {
+            const response = await ctx.client.session.messages({ path: { id: sessionID } });
+            const messages = response.data || [];
+
+            if (!args.force && !isSignificant(messages)) {
+              return `Session ${sessionID}: nothing significant found (${messages.length} messages, 0 errors). Use --force to generate anyway.`;
+            }
+
+            if (messages.length === 0) {
+              return `Session ${sessionID}: no messages yet.`;
+            }
+
+            const jsonl = eventToJSONL(messages);
+            const filepath = join(BLOG_DIR, `session-${sessionID}.jsonl`);
+            writeFileSync(filepath, jsonl, "utf-8");
+
+            const result = borgblog(`generate --log ${filepath} --llm`);
+            try { borgblog("publish --push"); } catch {}
+
+            const postPath = join(BLOG_DIR, "_posts");
+            return `Retrospective generated and published.\nBlog: https://oulico.github.io/my-retro-blog/\nOutput: ${result.trim()}`;
+          } catch (err) {
+            return `Failed to generate retrospective: ${err.message}`;
+          }
+        },
+      }),
+    },
+
     event: async ({ event }) => {
       const { type, properties } = event || {};
       const sessionID = properties?.sessionID || properties?.info?.id;
