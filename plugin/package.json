@@ -4,12 +4,25 @@
   "type": "module",
   "main": "index.js",
   "description": "Auto-generate AI retrospective blog posts from OpenCode sessions. Detects significant sessions (errors, retries, high token usage) and publishes LLM-powered failure retrospectives to a Jekyll blog on GitHub Pages.",
-  "keywords": ["opencode", "plugin", "retrospective", "blog", "jekyll", "ai", "agent"],
+  "keywords": [
+    "opencode",
+    "plugin",
+    "retrospective",
+    "blog",
+    "jekyll",
+    "ai",
+    "agent"
+  ],
   "license": "MIT",
   "repository": "github:oulico/borgblog",
   "peerDependencies": {
-    "@opencode-ai/plugin": ">=1.0.0"
+    "@opencode-ai/plugin": "^1.14.24"
   },
-  "engines": { "node": ">=18" },
-  "files": ["index.js", "README.md"]
+  "engines": {
+    "node": ">=18"
+  },
+  "files": [
+    "index.js",
+    "README.md"
+  ]
 }
